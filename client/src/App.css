@@ -26,3 +26,7 @@ button{
 button:hover{
   background-color: green;
 }
+
+a{
+  text-decoration: none;
+}
