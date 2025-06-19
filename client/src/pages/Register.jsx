@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 function Register(){
     const  [firstName, setFirstName] = useState('')
@@ -9,6 +9,7 @@ function Register(){
     const  [password, setPassword] = useState('')
     const  [confirmPassword, setConfirmPassword] = useState('')
     const [role, setRole] = useState('user')
+    const navigate = useNavigate()
 
     function handleSubmit(event){
         event.preventDefault()
@@ -34,13 +35,17 @@ function Register(){
                 setEmail('')
                 setPassword('')
                 setConfirmPassword('')
-                if(data){
-                    alert(data.message)
-                }
+                
+                alert(data.message)
+                navigate('/home')
+                
             })
             .catch(err => console.error(err))
         ), [])
     }
+
+        
+    
     return <>
 
          <div className="login-form">
@@ -62,6 +67,7 @@ function Register(){
                 <option value="admin">Admin</option> 
                 
                 </select>
+            
 
             <p><Link to='/login'>Already have an account? Log in</Link></p>
             

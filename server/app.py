@@ -1,8 +1,7 @@
-from flask import Flask, make_response
+from flask import Flask, make_response, request
 from flask_migrate  import Migrate
 from flask_cors import CORS
 from models import db, Admin, User
-from requests import request
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -25,10 +24,10 @@ def admins():
         
     elif request.method == 'POST':
         new_admin = Admin(
-            first_name= request.form.get('first_name'),
-            last_name= request.form.get('last_name'),
-            email= request.form.get('email'),
-            password= generate_password_hash(request.form.get('password'))
+            first_name= request.get_json.get('first_name'),
+            last_name= request.get_json().get('last_name'),
+            email= request.get_json().get('email'),
+            password= generate_password_hash(request.get_json().get('password'))
         )
         db.session.add(new_admin)
         db.session.commit()
@@ -37,6 +36,7 @@ def admins():
         
     return make_response(response_body, status_code)
 
+@app.route('/users', methods=['GET', 'POST'])
 def users():
     
     if request.method == 'GET':
@@ -44,40 +44,41 @@ def users():
         status_code = 200
         
     elif request.method == 'POST':
-        new_admin = Admin(
-            first_name= request.form.get('first_name'),
-            last_name= request.form.get('last_name'),
-            email= request.form.get('email'),
-            password= generate_password_hash(request.form.get('password'))
+        new_user= User(
+            first_name= request.get_json().get('first_name'),
+            last_name= request.get_json().get('last_name'),
+            email= request.get_json().get('email'),
+            password= generate_password_hash(request.get_json().get('password'))
         )
-        db.session.add(new_admin)
+        db.session.add(new_user)
         db.session.commit()
         response_body = {'message': 'You have successfully signed up'}
         status_code = 201
         
     return make_response(response_body, status_code)
 
-@app.route('/admins/<string:email>')
+@app.route('/admins/<string:email>', methods=['POST'])
 def admins_by_email(email):
-    admin = (Admin.query.filter(Admin.email == email).first()).to_dict()
+    admin = (Admin.query.filter(Admin.email == email).first())
     
-    
-    password = request.form.get('password')
-    passwordsmatch = check_password_hash(admin.password, password)
-    if passwordsmatch:
-        response_body = {'message': f'Welcome to the site {admin.first_name}'}
-        status_code = 200
-    else:
-        response_body = {'error': 'passwords do not match'}
-        status_code = 404
+    if request.method == 'POST':
+        password = request.get_json().get('password')
+        passwordsmatch = check_password_hash(admin.password, password)
+        
+        if passwordsmatch:
+            response_body = {'message': f'Welcome to the site {admin.first_name}'}
+            status_code = 200
+        else:
+            response_body = {'error': 'passwords do not match'}
+            status_code = 404
+        
     return make_response(response_body, status_code)
 
 @app.route('/users/<string:email>')
 def users_by_email(email):
-    user = (User.query.filter(User.email == email).first()).to_dict()
-    
-    
-    password = request.form.get('password')
+    user = (User.query.filter(User.email == email).first())
+
+    password = request.get_json().get('password')
     passwordsmatch = check_password_hash(user.password, password)
     if passwordsmatch:
         response_body = {'message': f'Welcome to the site {user.first_name}'}
